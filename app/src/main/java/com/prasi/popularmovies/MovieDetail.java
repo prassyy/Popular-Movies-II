@@ -1,45 +1,35 @@
 package com.prasi.popularmovies;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by User on 20-02-2016.
- */
-public class MovieDetail implements Parcelable {
-    private String posterPath;
-    private String originalTitle;
-    private String overview;
-    private String voteAverage;
-    private String releaseDate;
+public class MovieDetail {
 
-    public MovieDetail(String posterPath, String originalTitle, String overview, String voteAverage, String releaseDate) {
-        this.posterPath = posterPath;
-        this.originalTitle = originalTitle;
-        this.overview = overview;
-        this.voteAverage = voteAverage;
-        this.releaseDate = releaseDate;
+    @SerializedName("poster_path") private String posterPath;
+    @SerializedName("adult") private String adult;
+    @SerializedName("overview") private String overview;
+    @SerializedName("release_date") private String releaseDate;
+    @SerializedName("id") private int id;
+    @SerializedName("original_title") private String originalTitle;
+    @SerializedName("backdrop_path") private String backdrop_path;
+    @SerializedName("popularity") private String popularity;
+    @SerializedName("vote_average") private String voteAverage;
+    @SerializedName("vote_count") private String voteCount;
+
+    public String getAdult() {
+        return adult;
     }
 
-    protected MovieDetail(Parcel in) {
-        posterPath = in.readString();
-        originalTitle = in.readString();
-        overview = in.readString();
-        voteAverage = in.readString();
-        releaseDate = in.readString();
+    public String getBackdrop_path() {
+        return backdrop_path;
     }
 
-    public static final Creator<MovieDetail> CREATOR = new Creator<MovieDetail>() {
-        @Override
-        public MovieDetail createFromParcel(Parcel in) {
-            return new MovieDetail(in);
-        }
+    public int getId() {
+        return id;
+    }
 
-        @Override
-        public MovieDetail[] newArray(int size) {
-            return new MovieDetail[size];
-        }
-    };
+    public String getPopularity() {
+        return popularity;
+    }
 
     public String getOriginalTitle() {
         return originalTitle;
@@ -61,31 +51,7 @@ public class MovieDetail implements Parcelable {
         return posterPath;
     }
 
-    /**
-     * Describe the kinds of special objects contained in this Parcelable's
-     * marshalled representation.
-     *
-     * @return a bitmask indicating the set of special object types marshalled
-     * by the Parcelable.
-     */
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    /**
-     * Flatten this object in to a Parcel.
-     *
-     * @param dest  The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
-     */
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(posterPath);
-        dest.writeString(originalTitle);
-        dest.writeString(overview);
-        dest.writeString(voteAverage);
-        dest.writeString(releaseDate);
+    public String getVoteCount() {
+        return voteCount;
     }
 }

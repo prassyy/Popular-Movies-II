@@ -6,6 +6,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.facebook.stetho.Stetho;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
+import okhttp3.OkHttpClient;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -18,6 +23,10 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.container, new MainActivityFragment())
                     .commit();
         }
+        Stetho.initializeWithDefaults(this);
+        new OkHttpClient.Builder()
+                .addNetworkInterceptor(new StethoInterceptor())
+                .build();
     }
 
     @Override
