@@ -1,7 +1,6 @@
 package com.prasi.popularmovies;
 
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.prasi.popularmovies.data.MovieContract;
-import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,8 +31,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     public static class MovieDetailFragment extends Fragment {
 
         private String LOG_TAG = MovieDetailFragment.class.getSimpleName();
-        private final String TMDB_POSTER_BASEURL = "http://image.tmdb.org/t/p/";
-        private final String TMDB_IMAGE_SIZE = "w185/";
 
         private static String[] MOVIE_DETAIL_COLUMNS = {
                 MovieContract.MovieEntry._ID,
@@ -68,22 +64,17 @@ public class MovieDetailActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
             ButterKnife.bind(this,rootView);
 
-            Uri detailUri = getActivity().getIntent().getData();
-            Cursor movieDetailCursor = getActivity().getContentResolver().query(detailUri,
+            long movieId = getActivity().getIntent().getLongExtra("movie_id",1);
+            Cursor movieDetailCursor = getActivity().getContentResolver().query(MovieContract.MovieEntry.buildMovieUri(movieId),
                     MOVIE_DETAIL_COLUMNS,
-                    null,
-                    null,
+                    MovieContract.MovieEntry._ID+" = ? ",
+                    new String[]{String.valueOf(movieId)},
                     null);
 
             if(movieDetailCursor != null) {
+                movieDetailCursor.moveToFirst();
                 movieTitle.setText(movieDetailCursor.getString(MovieDetailFragment.COL_ORIGINAL_TITLE));
-
-                String posterPath = Uri.parse(TMDB_POSTER_BASEURL).buildUpon()
-                        .appendEncodedPath(TMDB_IMAGE_SIZE)
-                        .appendEncodedPath(movieDetailCursor.getString(MovieDetailFragment.COL_POSTER_PATH))
-                        .build().toString();
-                Picasso.with(getActivity()).load(posterPath).into(movieThumbnailPoster);
-
+                Utility.loadImageInto(getActivity(),movieDetailCursor.getString(MovieDetailFragment.COL_POSTER_PATH),movieThumbnailPoster);
                 movieOverview.setText(movieDetailCursor.getString(MovieDetailFragment.COL_OVERVIEW));
                 movieRating.setText(getResources().getString(R.string.rating_heading, movieDetailCursor.getString(MovieDetailFragment.COL_VOTE_AVERAGE)));
                 movieReleaseDate.setText(getResources().getString(R.string.release_date_heading, movieDetailCursor.getString(MovieDetailFragment.COL_RELEASE_DATE)));

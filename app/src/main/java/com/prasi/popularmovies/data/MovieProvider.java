@@ -9,6 +9,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import static com.prasi.popularmovies.data.MovieContract.PATH_FAVOURITES;
+import static com.prasi.popularmovies.data.MovieContract.PATH_MOST_VOTES;
+import static com.prasi.popularmovies.data.MovieContract.PATH_POPULARITY;
 
 /**
  * Created by User on 04-08-2016.
@@ -29,9 +34,9 @@ public class MovieProvider extends ContentProvider {
         UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         matcher.addURI(content,MovieContract.PATH_MOVIE+"/#",MOVIE_WITH_ID);
         matcher.addURI(content,MovieContract.PATH_MOVIE,MOVIE);
-        matcher.addURI(content,MovieContract.PATH_POPULARITY,POPULAR_MOVIES);
-        matcher.addURI(content,MovieContract.PATH_MOST_VOTES,MOST_VOTED_MOVIES);
-        matcher.addURI(content,MovieContract.PATH_FAVOURITES,FAVOURITE_MOVIES);
+        matcher.addURI(content,MovieContract.PATH_SORT_ORDER+"/"+PATH_POPULARITY,POPULAR_MOVIES);
+        matcher.addURI(content,MovieContract.PATH_SORT_ORDER+"/"+PATH_MOST_VOTES,MOST_VOTED_MOVIES);
+        matcher.addURI(content,MovieContract.PATH_SORT_ORDER+"/"+PATH_FAVOURITES,FAVOURITE_MOVIES);
         return matcher;
     }
 
@@ -45,7 +50,8 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase movieDatabase = sqlOpenHelper.getReadableDatabase();
-        Cursor returnCursor = null;
+        Cursor returnCursor;
+        Log.d("MovieProviderQuery",uri.toString());
         switch(movieUriMatcher.match(uri)){
             case MOVIE_WITH_ID:
                 returnCursor = movieDatabase.query(MovieContract.MovieEntry.TABLE_NAME,

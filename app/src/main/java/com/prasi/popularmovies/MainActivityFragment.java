@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -18,14 +19,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.ListView;
 
 import com.prasi.popularmovies.data.MovieContract;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,24 +37,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    @BindView(R.id.recycler_view) RecyclerView recyclerView;
     private static String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private static final String SELECTED_KEY = "MOVIES";
     private int mPosition = GridView.INVALID_POSITION;
 
     private MovieThumbnailAdapter movieListAdapter;
-    @BindView(R.id.movie_thumbnail_gridview) GridView movieThumbnailGrid;
+    RecyclerView movieThumbnailRecyclerView;
 
-    private ArrayList<MovieDetail> movieDetailList;
     private static String[] MOVIE_COLUMNS = {
             MovieContract.MovieEntry.TABLE_NAME+"."+MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_POSTER_PATH
     };
-    static final int COL_MOVIE_ID = 0;
-    static final int COL_POSTER_PATH = 1;
-
-    public MainActivityFragment() {
-        movieDetailList = new ArrayList<>();
-    }
+    static final int MOVIE_LOADER = 0;
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -66,6 +61,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onResume() {
+        getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
+        super.onResume();
     }
 
     @Override
@@ -87,6 +88,12 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         updateMovieList();
@@ -95,17 +102,20 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        movieListAdapter = new MovieThumbnailAdapter(getContext(),null,0);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        ButterKnife.bind(this,rootView);
 
-        RecyclerView recyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_main, container, false);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(),5));
+        recyclerView.setHasFixedSize(true);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
+        recyclerView.setLayoutManager(layoutManager);
+
+        movieListAdapter = new MovieThumbnailAdapter(getContext(),null,0);
         recyclerView.setAdapter(movieListAdapter);
 
-        getLayoutInflater(savedInstanceState).inflate(R.layout.grid_view, container);
         if(savedInstanceState!=null && savedInstanceState.containsKey(SELECTED_KEY)) {
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
-        return recyclerView;
+        return rootView;
     }
 
     private void updateMovieList() {
@@ -142,6 +152,7 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String sortBy = Utility.getPreferredSortOrder(getActivity());
         Uri movieListUri = MovieContract.buildMovieListUri(sortBy);
+        Log.d("onCreateLoader", movieListUri.toString());
 
         return new CursorLoader(getActivity(),
                 movieListUri,
@@ -154,9 +165,8 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieListAdapter.loadCursor(data);
-        if (mPosition != ListView.INVALID_POSITION) {
-            movieThumbnailGrid.smoothScrollToPosition(mPosition);
-        }
+        if (mPosition != GridView.INVALID_POSITION && movieThumbnailRecyclerView!=null)
+            movieThumbnailRecyclerView.smoothScrollToPosition(mPosition);
     }
 
     @Override

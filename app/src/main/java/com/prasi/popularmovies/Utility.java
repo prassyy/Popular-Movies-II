@@ -3,9 +3,12 @@ package com.prasi.popularmovies;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.widget.ImageView;
 
 import com.prasi.popularmovies.data.MovieContract;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.Vector;
@@ -40,7 +43,7 @@ public class Utility {
         if(movieValuesVector.size()>0) {
             ContentValues[] movieValuesArray = new ContentValues[movieValuesVector.size()];
             movieValuesVector.toArray(movieValuesArray);
-            context.getApplicationContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI
+            context.getApplicationContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.buildMovieUri()
                     ,movieValuesArray);
         }
     }
@@ -64,5 +67,21 @@ public class Utility {
             context.getApplicationContext().getContentResolver().bulkInsert(MovieContract.buildMovieListUri(sortBy)
                     ,movieSortValuesArray);
         }
+    }
+
+    public static void loadImageInto(Context context, String posterPath, ImageView imageView) {
+        final String TMDB_POSTER_BASEURL = "http://image.tmdb.org/t/p/";
+        final String TMDB_IMAGE_SIZE = "w185/";
+
+        String posterUrl = Uri.parse(TMDB_POSTER_BASEURL).buildUpon()
+                .appendEncodedPath(TMDB_IMAGE_SIZE)
+                .appendEncodedPath(posterPath)
+                .build().toString();
+
+        Picasso.with(context)
+                .load(posterUrl)
+                .placeholder(R.mipmap.clapboard)
+                .error(R.mipmap.clapboard)
+                .into(imageView);
     }
 }

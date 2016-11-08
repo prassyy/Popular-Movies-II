@@ -7,4 +7,5 @@
     <dimen name="movie_thumbnail_vertical_spacing">10dp</dimen>
     <dimen name="movie_thumbnail_horizontal_spacing">10dp</dimen>
     <dimen name="text_margin_spacing">5dp</dimen>
+    <dimen name="movie_grid_item_width">120dp</dimen>
 </resources>

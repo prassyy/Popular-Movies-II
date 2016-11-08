@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by User on 04-08-2016.
  */
 public class MovieDataHelper extends SQLiteOpenHelper{
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "movieList.db";
 
     public MovieDataHelper(Context context) {
@@ -27,22 +27,23 @@ public class MovieDataHelper extends SQLiteOpenHelper{
         db.execSQL(
                 "CREATE TABLE "+ MovieContract.MovieEntry.TABLE_NAME+" ( "+
                         MovieContract.MovieEntry._ID +" INTEGER PRIMARY KEY, "+
-                        MovieContract.MovieEntry.COLUMN_ADULT+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_BACKDROP_PATH+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_OVERVIEW+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_POPULARITY+" REAL NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_POSTER_PATH+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_RELEASE_DATE+" TEXT NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE+" REAL NOT NULL, "+
-                        MovieContract.MovieEntry.COLUMN_VOTE_COUNT+" INTEGER NOT NULL"+
+                        MovieContract.MovieEntry.COLUMN_ADULT+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_BACKDROP_PATH+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_OVERVIEW+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_POPULARITY+" REAL , "+
+                        MovieContract.MovieEntry.COLUMN_POSTER_PATH+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_RELEASE_DATE+" TEXT , "+
+                        MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE+" REAL , "+
+                        MovieContract.MovieEntry.COLUMN_VOTE_COUNT+" INTEGER "+
                         " ); ");
     }
 
     private void addMostVotedMoviesTable(SQLiteDatabase db) {
         db.execSQL(
                 "CREATE TABLE "+ MovieContract.MostVotedMoviesEntry.TABLE_NAME+" ( "+
-                        MovieContract.MostVotedMoviesEntry._ID+" INTEGER PRIMARY KEY, "+
+                        MovieContract.MostVotedMoviesEntry._ID+" INTEGER PRIMARY KEY, " +
+                        MovieContract.MostVotedMoviesEntry.COLUMN_MOVIE_ID + " INTEGER ," +
                         "FOREIGN KEY ("+MovieContract.MostVotedMoviesEntry.COLUMN_MOVIE_ID+") "+
                         "REFERENCES "+ MovieContract.MovieEntry.TABLE_NAME +" ("+ MovieContract.MovieEntry._ID+" )"+
                         " ); ");
@@ -52,6 +53,7 @@ public class MovieDataHelper extends SQLiteOpenHelper{
         db.execSQL(
                 "CREATE TABLE "+ MovieContract.PopularMoviesEntry.TABLE_NAME+" ( "+
                         MovieContract.PopularMoviesEntry._ID+" INTEGER PRIMARY KEY, "+
+                        MovieContract.PopularMoviesEntry.COLUMN_MOVIE_ID +" INTEGER ," +
                         "FOREIGN KEY ("+MovieContract.PopularMoviesEntry.COLUMN_MOVIE_ID+") "+
                         "REFERENCES "+ MovieContract.MovieEntry.TABLE_NAME +" ("+ MovieContract.MovieEntry._ID+" )"+
                         " ); ");
@@ -61,6 +63,7 @@ public class MovieDataHelper extends SQLiteOpenHelper{
         db.execSQL(
                 "CREATE TABLE "+ MovieContract.FavouriteMoviesEntry.TABLE_NAME+" ( "+
                         MovieContract.FavouriteMoviesEntry._ID+" INTEGER PRIMARY KEY, "+
+                        MovieContract.PopularMoviesEntry.COLUMN_MOVIE_ID +" INTEGER ," +
                         "FOREIGN KEY ("+MovieContract.FavouriteMoviesEntry.COLUMN_MOVIE_ID+") "+
                         "REFERENCES "+ MovieContract.MovieEntry.TABLE_NAME +" ("+ MovieContract.MovieEntry._ID+" )"+
                         " ); ");
