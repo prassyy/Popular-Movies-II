@@ -3,10 +3,12 @@
     <string-array name="sort_entry">
         <item>Most Popular</item>
         <item>Highest Rated</item>
+        <item>Favourites</item>
     </string-array>
 
     <string-array name="sort_values">
         <item>popularity.desc</item>
         <item>vote_count.desc</item>
+        <item>favourites</item>
     </string-array>
 </resources>

@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -42,6 +43,7 @@ public class MovieDetailAnimatedActivity extends AppCompatActivity {
     @BindView(R.id.user_rating) TextView movieRating;
     @BindView(R.id.release_date) TextView movieReleaseDate;
     @BindView(R.id.main_collapsing) CollapsingToolbarLayout collapsingToolbar;
+    @BindView(R.id.favourite_button) FloatingActionButton favouriteButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,12 @@ public class MovieDetailAnimatedActivity extends AppCompatActivity {
                 new String[]{String.valueOf(movieId)},
                 null);
 
+        Cursor favouriteMovie = getContentResolver().query(MovieContract.FavouriteMoviesEntry.buildFavouriteMovieList(),
+                new String[]{MovieContract.FavouriteMoviesEntry.COLUMN_MOVIE_ID},
+                MovieContract.FavouriteMoviesEntry.COLUMN_MOVIE_ID+" = ? ",
+                new String[]{String.valueOf(movieId)},
+                null);
+
         if(movieDetailCursor != null) {
             movieDetailCursor.moveToFirst();
             movieTitle.setText(movieDetailCursor.getString(COL_ORIGINAL_TITLE));
@@ -67,6 +75,9 @@ public class MovieDetailAnimatedActivity extends AppCompatActivity {
             collapsingToolbar.setCollapsedTitleTypeface(Typeface.createFromAsset(getAssets(),"fonts/hobo.otf"));
             collapsingToolbar.setExpandedTitleTextAppearance(R.style.ExpandedTextStyle);
             collapsingToolbar.setExpandedTitleTypeface(Typeface.createFromAsset(getAssets(),"fonts/hobo.otf"));
+
+            if(!favouriteMovie.moveToFirst())
+                favouriteButton.setRippleColor(getResources().getColor(R.color.colorBright));
 
             movieOverview.setText(movieDetailCursor.getString(COL_OVERVIEW));
             movieRating.setText(getResources().getString(R.string.rating_heading, movieDetailCursor.getString(COL_VOTE_AVERAGE)));
