@@ -25,14 +25,14 @@ public class MovieThumbnailAdapter extends RecyclerView.Adapter<MovieThumbnailAd
         this.mCursorAdapter = new CursorAdapter(context,c,flags) {
             @Override
             public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                return LayoutInflater.from(context).inflate(R.layout.grid_movie_layout, parent, false);
+                return LayoutInflater.from(context).inflate(R.layout.movies_list_item, parent, false);
             }
 
             @Override
             public void bindView(View view, Context context, Cursor cursor) {
                 view.setTag(cursor.getLong(COL_MOVIE_ID));
                 ViewHolder holder = new ViewHolder(view);
-                Utility.loadImageInto(context, cursor.getString(COL_POSTER_PATH), holder.movieThumbnailView);
+                Utility.loadImageInto(context, cursor.getString(COL_POSTER_PATH), null,holder.movieThumbnailView);
             }
         };
         this.mContext = context;

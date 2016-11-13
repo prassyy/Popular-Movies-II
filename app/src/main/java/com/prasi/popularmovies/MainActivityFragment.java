@@ -20,6 +20,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import com.prasi.popularmovies.api.MovieDetail;
+import com.prasi.popularmovies.api.MovieDetailsResponse;
+import com.prasi.popularmovies.api.TheMovieDb;
 import com.prasi.popularmovies.data.MovieContract;
 
 import java.util.List;
@@ -29,8 +32,6 @@ import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -38,18 +39,18 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
-    private static String LOG_TAG = MainActivityFragment.class.getSimpleName();
+
+    private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     private static final String SELECTED_KEY = "MOVIES";
+
     private int mPosition = GridView.INVALID_POSITION;
-
     private MovieThumbnailAdapter movieListAdapter;
-    RecyclerView movieThumbnailRecyclerView;
 
+    private static final int MOVIE_LOADER = 0;
     private static String[] MOVIE_COLUMNS = {
             MovieContract.MovieEntry.TABLE_NAME+"."+MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_POSTER_PATH
     };
-    static final int MOVIE_LOADER = 0;
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -120,13 +121,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     private void updateMovieList() {
         final String sortBy = Utility.getPreferredSortOrder(getContext());
-        final String MOVIE_DETAILS_BASE_URL = "http://api.themoviedb.org/3/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MOVIE_DETAILS_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        if(sortBy.equals("favourites"))
+            return;
 
-        TheMovieDb theMovieDb = retrofit.create(TheMovieDb.class);
+        TheMovieDb theMovieDb = Utility.getTheMovieDb();
         Call<MovieDetailsResponse> callMovieList = theMovieDb.getMovieDetails(
                 sortBy,
                 BuildConfig.THE_MOVIEDB_API_KEY);
@@ -138,7 +136,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
                 List<MovieDetail> movieDetailsList = movieDetailResponse.getMovieDetailsList();
                 Utility.persistMoviesList(getContext(), movieDetailsList);
                 Utility.persistSortOrderList(getContext(), movieDetailsList,sortBy);
-                movieListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -152,7 +149,6 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String sortBy = Utility.getPreferredSortOrder(getActivity());
         Uri movieListUri = MovieContract.buildMovieListUri(sortBy);
-        Log.d("onCreateLoader", movieListUri.toString());
 
         return new CursorLoader(getActivity(),
                 movieListUri,
@@ -165,8 +161,9 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieListAdapter.loadCursor(data);
-        if (mPosition != GridView.INVALID_POSITION && movieThumbnailRecyclerView!=null)
-            movieThumbnailRecyclerView.smoothScrollToPosition(mPosition);
+        movieListAdapter.notifyDataSetChanged();
+        if (mPosition != GridView.INVALID_POSITION && recyclerView!=null)
+            recyclerView.smoothScrollToPosition(mPosition);
     }
 
     @Override

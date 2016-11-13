@@ -2,7 +2,7 @@
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
 
-    <string name="movie_pref_sort_title">Sorting Order</string>
+    <string name="movie_pref_sort_title">Sort Movies by</string>
     <string name="movie_pref_sort_dialogtitle">Choose a sorting order:</string>
     <string name="movie_sort_order_key" translatable="false">sort_order</string>
     <string name="movie_pref_sort_popular" translatable="false">popularity.desc</string>
@@ -10,7 +10,10 @@
     <string name="activity_settings_title">Settings</string>
     <string name="activity_detail_title">Movie Details</string>
     <string name="detail_imageview_contentDesc">Displays the Thumbnail of the Movie selected</string>
-    <string name="plot_heading">Plot Synopsis</string>
-    <string name="rating_heading">User Rating: %s</string>
-    <string name="release_date_heading">Release Date: %s</string>
+    <string name="plot_heading">Plot</string>
+    <string name="reviews">Reviews</string>
+    <string name="trailers">Trailer(s)</string>
+    <string name="author">By %s</string>
+    <string name="review_display">[Click to read more..]</string>
+    <string name="review_title">%s : Reviews</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.prasi.popularmovies;
+package com.prasi.popularmovies.api;
 
 import com.google.gson.annotations.SerializedName;
 

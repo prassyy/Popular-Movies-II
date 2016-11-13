@@ -48,6 +48,25 @@ public class MovieProvider extends ContentProvider {
 
     @Nullable
     @Override
+    public String getType(Uri uri) {
+        switch (movieUriMatcher.match(uri)) {
+            case MOVIE_WITH_ID:
+                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
+            case MOVIE:
+                return MovieContract.MovieEntry.CONTENT_DIR_TYPE;
+            case POPULAR_MOVIES:
+                return MovieContract.PopularMoviesEntry.CONTENT_DIR_TYPE;
+            case MOST_VOTED_MOVIES:
+                return MovieContract.MostVotedMoviesEntry.CONTENT_DIR_TYPE;
+            case FAVOURITE_MOVIES:
+                return MovieContract.FavouriteMoviesEntry.CONTENT_DIR_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+    }
+
+    @Nullable
+    @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase movieDatabase = sqlOpenHelper.getReadableDatabase();
         Cursor returnCursor;
@@ -73,71 +92,12 @@ public class MovieProvider extends ContentProvider {
         return returnCursor;
     }
 
-    private Cursor getFavouriteMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteQueryBuilder favouriteMoviesQueryBuilder = new SQLiteQueryBuilder();
-        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
-        String favouriteMoviesTable = MovieContract.FavouriteMoviesEntry.TABLE_NAME;
-
-        favouriteMoviesQueryBuilder.setTables(
-                movieTable+" INNER JOIN "+ favouriteMoviesTable+
-                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
-                        " = "+favouriteMoviesTable+"."+ MovieContract.FavouriteMoviesEntry.COLUMN_MOVIE_ID
-        );
-        return favouriteMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
-                projection,selection,selectionArgs,null,null,sortOrder);
-    }
-
-    private Cursor getMostVotedMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteQueryBuilder mostVotedMoviesQueryBuilder = new SQLiteQueryBuilder();
-        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
-        String mostVotedMoviesTable = MovieContract.MostVotedMoviesEntry.TABLE_NAME;
-
-        mostVotedMoviesQueryBuilder.setTables(
-                movieTable+" INNER JOIN "+ mostVotedMoviesTable+
-                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
-                        " = "+mostVotedMoviesTable+"."+ MovieContract.MostVotedMoviesEntry.COLUMN_MOVIE_ID
-        );
-        return mostVotedMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
-                projection,selection,selectionArgs,null,null,sortOrder);
-    }
-
-    private Cursor getPopularMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        SQLiteQueryBuilder popularMoviesQueryBuilder = new SQLiteQueryBuilder();
-        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
-        String popularMoviesTable = MovieContract.PopularMoviesEntry.TABLE_NAME;
-
-        popularMoviesQueryBuilder.setTables(
-                movieTable+" INNER JOIN "+ popularMoviesTable+
-                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
-                        " = "+popularMoviesTable+"."+ MovieContract.PopularMoviesEntry.COLUMN_MOVIE_ID
-        );
-        return popularMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
-                projection,selection,selectionArgs,null,null,sortOrder);
-    }
-
-    @Nullable
-    @Override
-    public String getType(Uri uri) {
-        switch (movieUriMatcher.match(uri)) {
-            case MOVIE_WITH_ID:
-                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
-            case MOVIE:
-                return MovieContract.MovieEntry.CONTENT_DIR_TYPE;
-            case POPULAR_MOVIES:
-                return MovieContract.PopularMoviesEntry.CONTENT_DIR_TYPE;
-            case MOST_VOTED_MOVIES:
-                return MovieContract.MostVotedMoviesEntry.CONTENT_DIR_TYPE;
-            case FAVOURITE_MOVIES:
-                return MovieContract.FavouriteMoviesEntry.CONTENT_DIR_TYPE;
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-        }
-    }
-
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         switch(movieUriMatcher.match(uri)) {
+            case FAVOURITE_MOVIES:
+                return insertIntoFavouriteMovies(values);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -146,6 +106,8 @@ public class MovieProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         switch(movieUriMatcher.match(uri)) {
+            case FAVOURITE_MOVIES:
+                return deleteFromFavouriteMovies(selection, selectionArgs);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -227,5 +189,60 @@ public class MovieProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Uri: "+uri);
         }
+    }
+
+    private Uri insertIntoFavouriteMovies(ContentValues values) {
+        SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
+        long _id = db.insert(MovieContract.FavouriteMoviesEntry.TABLE_NAME, null, values);
+        if(_id == -1)
+            return null;
+        return MovieContract.FavouriteMoviesEntry.buildFavouriteMovieList();
+    }
+
+    private int deleteFromFavouriteMovies(String selection, String[] selectionArgs) {
+        SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
+        return db.delete(MovieContract.FavouriteMoviesEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    private Cursor getFavouriteMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        SQLiteQueryBuilder favouriteMoviesQueryBuilder = new SQLiteQueryBuilder();
+        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
+        String favouriteMoviesTable = MovieContract.FavouriteMoviesEntry.TABLE_NAME;
+
+        favouriteMoviesQueryBuilder.setTables(
+                movieTable+" INNER JOIN "+ favouriteMoviesTable+
+                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
+                        " = "+favouriteMoviesTable+"."+ MovieContract.FavouriteMoviesEntry.COLUMN_MOVIE_ID
+        );
+        return favouriteMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
+                projection,selection,selectionArgs,null,null,sortOrder);
+    }
+
+    private Cursor getMostVotedMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        SQLiteQueryBuilder mostVotedMoviesQueryBuilder = new SQLiteQueryBuilder();
+        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
+        String mostVotedMoviesTable = MovieContract.MostVotedMoviesEntry.TABLE_NAME;
+
+        mostVotedMoviesQueryBuilder.setTables(
+                movieTable+" INNER JOIN "+ mostVotedMoviesTable+
+                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
+                        " = "+mostVotedMoviesTable+"."+ MovieContract.MostVotedMoviesEntry.COLUMN_MOVIE_ID
+        );
+        return mostVotedMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
+                projection,selection,selectionArgs,null,null,sortOrder);
+    }
+
+    private Cursor getPopularMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        SQLiteQueryBuilder popularMoviesQueryBuilder = new SQLiteQueryBuilder();
+        String movieTable = MovieContract.MovieEntry.TABLE_NAME;
+        String popularMoviesTable = MovieContract.PopularMoviesEntry.TABLE_NAME;
+
+        popularMoviesQueryBuilder.setTables(
+                movieTable+" INNER JOIN "+ popularMoviesTable+
+                        " ON "+ movieTable+"."+ MovieContract.MovieEntry._ID+
+                        " = "+popularMoviesTable+"."+ MovieContract.PopularMoviesEntry.COLUMN_MOVIE_ID
+        );
+        return popularMoviesQueryBuilder.query(sqlOpenHelper.getReadableDatabase(),
+                projection,selection,selectionArgs,null,null,sortOrder);
     }
 }

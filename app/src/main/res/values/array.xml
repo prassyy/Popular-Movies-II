@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="sort_entry">
-        <item>Most Popular</item>
+        <item>Popularity</item>
         <item>Highest Rated</item>
         <item>Favourites</item>
     </string-array>

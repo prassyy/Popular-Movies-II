@@ -15,7 +15,7 @@ public class MovieContract {
     public static final String PATH_MOVIE = "movie";
     public static final String PATH_SORT_ORDER = "sort_order";
     public static final String PATH_POPULARITY = "popularity";
-    public static final String PATH_FAVOURITES = "favourite";
+    public static final String PATH_FAVOURITES = "favourites";
     public static final String PATH_MOST_VOTES = "vote_count";
 
     public static Uri buildMovieListUri(String sortBy) {
@@ -40,7 +40,7 @@ public class MovieContract {
                 return new PopularMoviesEntry();
             case "vote_count.desc":
                 return new MostVotedMoviesEntry();
-            case "favourite":
+            case "favourites":
                 return new FavouriteMoviesEntry();
             default:
                 return null;
