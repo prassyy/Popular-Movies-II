@@ -59,15 +59,16 @@ public class MovieReviewsAdapter extends RecyclerView.Adapter<MovieReviewsAdapte
             holder.reviewContent.setText(reviewContent);
             holder.readMoreIndicator.setVisibility(View.GONE);
         }
-        else
-            holder.reviewContent.setText(reviewContent.substring(0,499));
-        holder.view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getReviewUrl()));
-                mContext.startActivity(browserIntent);
-            }
-        });
+        else {
+            holder.reviewContent.setText(reviewContent.substring(0, 499));
+            holder.view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getReviewUrl()));
+                    mContext.startActivity(browserIntent);
+                }
+            });
+        }
     }
 
     @Override

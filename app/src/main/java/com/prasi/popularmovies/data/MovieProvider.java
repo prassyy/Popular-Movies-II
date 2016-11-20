@@ -19,14 +19,16 @@ import static com.prasi.popularmovies.data.MovieContract.PATH_POPULARITY;
  * Created by User on 04-08-2016.
  */
 public class MovieProvider extends ContentProvider {
+    private static final String LOG_TAG = MovieProvider.class.getSimpleName();
     private static final UriMatcher movieUriMatcher = buildUriMatcher();
-    private MovieDataHelper sqlOpenHelper;
 
     private static final int MOVIE_WITH_ID = 100;
     private static final int MOVIE = 101;
     private static final int POPULAR_MOVIES = 102;
     private static final int MOST_VOTED_MOVIES = 103;
     private static final int FAVOURITE_MOVIES = 104;
+
+    private MovieDataHelper sqlOpenHelper;
 
     private static UriMatcher buildUriMatcher() {
         String content = MovieContract.CONTENT_AUTHORITY;
@@ -70,8 +72,8 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase movieDatabase = sqlOpenHelper.getReadableDatabase();
         Cursor returnCursor;
-        Log.d("MovieProviderQuery",uri.toString());
-        switch(movieUriMatcher.match(uri)){
+        Log.d(LOG_TAG,uri.toString());
+        switch(movieUriMatcher.match(uri)) {
             case MOVIE_WITH_ID:
                 returnCursor = movieDatabase.query(MovieContract.MovieEntry.TABLE_NAME,
                         projection,selection,selectionArgs,null,null,sortOrder);
@@ -138,6 +140,7 @@ public class MovieProvider extends ContentProvider {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
+                    db.close();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
@@ -153,6 +156,7 @@ public class MovieProvider extends ContentProvider {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
+                    db.close();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
@@ -168,6 +172,7 @@ public class MovieProvider extends ContentProvider {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
+                    db.close();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
@@ -183,6 +188,7 @@ public class MovieProvider extends ContentProvider {
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
+                    db.close();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
@@ -193,15 +199,23 @@ public class MovieProvider extends ContentProvider {
 
     private Uri insertIntoFavouriteMovies(ContentValues values) {
         SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
+        db.beginTransaction();
         long _id = db.insert(MovieContract.FavouriteMoviesEntry.TABLE_NAME, null, values);
-        if(_id == -1)
+        db.endTransaction();
+        db.close();
+        if(_id == -1) {
             return null;
+        }
         return MovieContract.FavouriteMoviesEntry.buildFavouriteMovieList();
     }
 
     private int deleteFromFavouriteMovies(String selection, String[] selectionArgs) {
         SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
-        return db.delete(MovieContract.FavouriteMoviesEntry.TABLE_NAME, selection, selectionArgs);
+        db.beginTransaction();
+        int deleteCount = db.delete(MovieContract.FavouriteMoviesEntry.TABLE_NAME, selection, selectionArgs);
+        db.endTransaction();
+        db.close();
+        return deleteCount;
     }
 
     private Cursor getFavouriteMovies(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {

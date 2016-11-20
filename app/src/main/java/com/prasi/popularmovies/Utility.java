@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.v4.app.LoaderManager;
 import android.widget.ImageView;
 
 import com.prasi.popularmovies.api.MovieDetail;
@@ -23,7 +24,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Utility {
-    private static final String LOG_TAG = Utility.class.getSimpleName();
+    public static final String THE_MOVIE_DB_API_KEY = "XXXXX";
 
     public static String getPreferredSortOrder(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -126,6 +127,7 @@ public class Utility {
             favouriteMovie.close();
             return true;
         }
+        favouriteMovie.close();
         return false;
     }
 
@@ -156,5 +158,12 @@ public class Utility {
             e.printStackTrace();
         }
         return date;
+    }
+
+    public static void triggerLoader(LoaderManager loaderManager, int loaderId, LoaderManager.LoaderCallbacks<Cursor> loaderCallbacks) {
+        if(loaderManager.getLoader(loaderId) == null)
+            loaderManager.initLoader(loaderId,null,loaderCallbacks);
+        else
+            loaderManager.restartLoader(loaderId,null,loaderCallbacks);
     }
 }

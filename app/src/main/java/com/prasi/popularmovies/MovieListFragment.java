@@ -2,9 +2,7 @@ package com.prasi.popularmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -18,7 +16,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 
 import com.prasi.popularmovies.api.MovieDetail;
 import com.prasi.popularmovies.api.MovieDetailsResponse;
@@ -33,18 +30,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class MainActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MovieListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @BindView(R.id.recycler_view) RecyclerView recyclerView;
 
-    private static final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    private static final String SELECTED_KEY = "MOVIES";
+    private static final String LOG_TAG = MovieListFragment.class.getSimpleName();
 
-    private int mPosition = GridView.INVALID_POSITION;
     private MovieThumbnailAdapter movieListAdapter;
+    private String sortBy = "";
+    private boolean sortOrderChanged;
+    private boolean firstTimeLoad;
 
     private static final int MOVIE_LOADER = 0;
     private static String[] MOVIE_COLUMNS = {
@@ -53,27 +48,45 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     };
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putInt(SELECTED_KEY, mPosition);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        firstTimeLoad = true;
+        sortBy = Utility.getPreferredSortOrder(getContext());
+
+        View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
+        ButterKnife.bind(this,rootView);
+
+        recyclerView.setHasFixedSize(true);
+        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+        recyclerView.setLayoutManager(layoutManager);
+
+        movieListAdapter = new MovieThumbnailAdapter(((CallBack)getActivity()),getContext(),null,0);
+        recyclerView.setAdapter(movieListAdapter);
+
+        return rootView;
+    }
+
+    @Override
     public void onResume() {
-        getLoaderManager().restartLoader(MOVIE_LOADER, null, this);
         super.onResume();
+        String newSortOrder = Utility.getPreferredSortOrder(getActivity());
+        if(newSortOrder != null && !newSortOrder.equals(sortBy)) {
+            sortOrderChanged = true;
+            sortBy = newSortOrder;
+        }
+        updateMovieList(sortBy);
+        Utility.triggerLoader(getLoaderManager(),MOVIE_LOADER,this);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_settings) {
             Intent settingsIntent = new Intent(getActivity(),MovieSettingsActivity.class);
             startActivity(settingsIntent);
@@ -88,46 +101,14 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
         inflater.inflate(R.menu.menu_main, menu);
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
-        super.onActivityCreated(savedInstanceState);
-    }
+    private void updateMovieList(final String sortBy) {
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        updateMovieList();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        ButterKnife.bind(this,rootView);
-
-        recyclerView.setHasFixedSize(true);
-        GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 3);
-        recyclerView.setLayoutManager(layoutManager);
-
-        movieListAdapter = new MovieThumbnailAdapter(getContext(),null,0);
-        recyclerView.setAdapter(movieListAdapter);
-
-        if(savedInstanceState!=null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
-        }
-        return rootView;
-    }
-
-    private void updateMovieList() {
-        final String sortBy = Utility.getPreferredSortOrder(getContext());
         if(sortBy.equals("favourites"))
             return;
-
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
         Call<MovieDetailsResponse> callMovieList = theMovieDb.getMovieDetails(
                 sortBy,
-                BuildConfig.THE_MOVIEDB_API_KEY);
+                Utility.THE_MOVIE_DB_API_KEY);
 
         callMovieList.enqueue(new Callback<MovieDetailsResponse>() {
             @Override
@@ -147,11 +128,10 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortBy = Utility.getPreferredSortOrder(getActivity());
-        Uri movieListUri = MovieContract.buildMovieListUri(sortBy);
+        String sortBy = Utility.getPreferredSortOrder(getContext());
 
-        return new CursorLoader(getActivity(),
-                movieListUri,
+        return new CursorLoader(getContext(),
+                MovieContract.buildMovieListUri(sortBy),
                 MOVIE_COLUMNS,
                 null,
                 null,
@@ -162,8 +142,13 @@ public class MainActivityFragment extends Fragment implements LoaderManager.Load
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         movieListAdapter.loadCursor(data);
         movieListAdapter.notifyDataSetChanged();
-        if (mPosition != GridView.INVALID_POSITION && recyclerView!=null)
-            recyclerView.smoothScrollToPosition(mPosition);
+
+        if((sortOrderChanged || firstTimeLoad) && data!=null && !data.isClosed() && data.moveToFirst()) {
+            long movieId = data.getLong(MovieThumbnailAdapter.COL_MOVIE_ID);
+            ((CallBack)getActivity()).notifyMovieChanged(movieId);
+            sortOrderChanged = false;
+            firstTimeLoad = false;
+        }
     }
 
     @Override

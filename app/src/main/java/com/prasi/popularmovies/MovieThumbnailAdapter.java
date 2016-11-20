@@ -1,7 +1,6 @@
 package com.prasi.popularmovies;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
@@ -15,13 +14,14 @@ import butterknife.ButterKnife;
 
 public class MovieThumbnailAdapter extends RecyclerView.Adapter<MovieThumbnailAdapter.ViewHolder> {
 
-    private static final int COL_MOVIE_ID = 0;
-    private static final int COL_POSTER_PATH = 1;
+    public static final int COL_MOVIE_ID = 0;
+    public static final int COL_POSTER_PATH = 1;
 
     private CursorAdapter mCursorAdapter;
     private Context mContext;
+    private CallBack activity;
 
-    public MovieThumbnailAdapter(Context context, Cursor c, int flags) {
+    public MovieThumbnailAdapter(CallBack callingActivity, Context context, Cursor c, int flags) {
         this.mCursorAdapter = new CursorAdapter(context,c,flags) {
             @Override
             public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -36,6 +36,7 @@ public class MovieThumbnailAdapter extends RecyclerView.Adapter<MovieThumbnailAd
             }
         };
         this.mContext = context;
+        this.activity = callingActivity;
     }
 
     public void loadCursor(Cursor data) {
@@ -62,9 +63,7 @@ public class MovieThumbnailAdapter extends RecyclerView.Adapter<MovieThumbnailAd
             @Override
             public void onClick(View v) {
                 long movieId = (long)v.getTag();
-                Intent movieDetailsIntent = new Intent(mContext, MovieDetailAnimatedActivity.class);
-                movieDetailsIntent.putExtra("movie_id",movieId);
-                mContext.startActivity(movieDetailsIntent);
+                MovieThumbnailAdapter.this.activity.onItemSelected(movieId);
             }
         });
         return new ViewHolder(view);

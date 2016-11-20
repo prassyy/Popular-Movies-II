@@ -59,7 +59,7 @@ public class MovieReviewActivity extends AppCompatActivity{
         if(movieId == -1)
             return;
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
-        Call<MovieReviewsResponse> callReviewsList = theMovieDb.getMovieReviews(movieId,BuildConfig.THE_MOVIEDB_API_KEY);
+        Call<MovieReviewsResponse> callReviewsList = theMovieDb.getMovieReviews(movieId,Utility.THE_MOVIE_DB_API_KEY);
         callReviewsList.enqueue(new Callback<MovieReviewsResponse>() {
             @Override
             public void onResponse(Call<MovieReviewsResponse> call, Response<MovieReviewsResponse> response) {
@@ -67,7 +67,6 @@ public class MovieReviewActivity extends AppCompatActivity{
                 List<MovieReview> reviews = reviewsResponse.getMovieReviews();
                 MovieReviewsAdapter reviewsAdapter = new MovieReviewsAdapter(reviews);
                 reviewRecyclerView.setAdapter(reviewsAdapter);
-                Log.e(LOG_TAG,"getReviewsTriggered!");
             }
 
             @Override
