@@ -102,7 +102,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void updateMovieList(final String sortBy) {
-
+        //This condition is to just prevent API call from running in case if user asks for "Favourites" sort
+        //Because all the data needed are already available in the DB
         if(sortBy.equals("favourites"))
             return;
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
