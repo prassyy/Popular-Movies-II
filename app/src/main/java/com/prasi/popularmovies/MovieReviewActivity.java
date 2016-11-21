@@ -57,9 +57,9 @@ public class MovieReviewActivity extends AppCompatActivity{
 
     private void getReviewsList(long movieId) {
         if(movieId == -1)
-            return;
+            return; //This is just to skip the API call when preference is "Favourites", as the data is already available in DB
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
-        Call<MovieReviewsResponse> callReviewsList = theMovieDb.getMovieReviews(movieId,Utility.THE_MOVIE_DB_API_KEY);
+        Call<MovieReviewsResponse> callReviewsList = theMovieDb.getMovieReviews(movieId,BuildConfig.THE_MOVIE_DB_API_KEY);
         callReviewsList.enqueue(new Callback<MovieReviewsResponse>() {
             @Override
             public void onResponse(Call<MovieReviewsResponse> call, Response<MovieReviewsResponse> response) {

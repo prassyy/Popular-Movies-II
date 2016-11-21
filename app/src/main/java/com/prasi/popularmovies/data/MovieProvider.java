@@ -72,7 +72,7 @@ public class MovieProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteDatabase movieDatabase = sqlOpenHelper.getReadableDatabase();
         Cursor returnCursor;
-        Log.d(LOG_TAG,uri.toString());
+        Log.d(LOG_TAG,"Query URI: "+uri.toString());
         switch(movieUriMatcher.match(uri)) {
             case MOVIE_WITH_ID:
                 returnCursor = movieDatabase.query(MovieContract.MovieEntry.TABLE_NAME,
@@ -97,6 +97,7 @@ public class MovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.d(LOG_TAG,"Insert URI: "+ uri.toString());
         switch(movieUriMatcher.match(uri)) {
             case FAVOURITE_MOVIES:
                 return insertIntoFavouriteMovies(values);
@@ -201,6 +202,7 @@ public class MovieProvider extends ContentProvider {
         SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
         db.beginTransaction();
         long _id = db.insert(MovieContract.FavouriteMoviesEntry.TABLE_NAME, null, values);
+        db.setTransactionSuccessful(); //I have missed adding set transaction successful here which rolled back insert
         db.endTransaction();
         db.close();
         if(_id == -1) {
@@ -213,6 +215,7 @@ public class MovieProvider extends ContentProvider {
         SQLiteDatabase db = sqlOpenHelper.getWritableDatabase();
         db.beginTransaction();
         int deleteCount = db.delete(MovieContract.FavouriteMoviesEntry.TABLE_NAME, selection, selectionArgs);
+        db.setTransactionSuccessful();  //I have missed adding set transaction successful here which rolled back delete
         db.endTransaction();
         db.close();
         return deleteCount;

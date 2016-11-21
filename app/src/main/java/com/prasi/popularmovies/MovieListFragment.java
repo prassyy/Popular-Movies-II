@@ -108,7 +108,7 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
         Call<MovieDetailsResponse> callMovieList = theMovieDb.getMovieDetails(
                 sortBy,
-                Utility.THE_MOVIE_DB_API_KEY);
+                BuildConfig.THE_MOVIE_DB_API_KEY);
 
         callMovieList.enqueue(new Callback<MovieDetailsResponse>() {
             @Override

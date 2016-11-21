@@ -58,11 +58,10 @@ public class MovieTrailerAdapter extends RecyclerView.Adapter<MovieTrailerAdapte
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setPackage("com.google.android.youtube");
-                intent.setData(Uri.parse("https://www.youtube.com/watch").buildUpon()
-                        .appendQueryParameter("v", trailer.getYoutubeVideoKey()).build());
-                mContext.startActivity(intent);
+                //I have made the changes here as you suggested by skipping to set the package in the Intent call..
+                //That way it gives the user the choice to decide the app
+                mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch").buildUpon()
+                        .appendQueryParameter("v", trailer.getYoutubeVideoKey()).build()));
             }
         });
     }

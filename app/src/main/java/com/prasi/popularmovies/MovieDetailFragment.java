@@ -146,7 +146,7 @@ public class MovieDetailFragment extends Fragment implements LoaderManager.Loade
             return;
 
         TheMovieDb theMovieDb = Utility.getTheMovieDb();
-        Call<MovieTrailersResponse> callTrailerList = theMovieDb.getMovieTrailers(movieId,Utility.THE_MOVIE_DB_API_KEY);
+        Call<MovieTrailersResponse> callTrailerList = theMovieDb.getMovieTrailers(movieId,BuildConfig.THE_MOVIE_DB_API_KEY);
         callTrailerList.enqueue(new Callback<MovieTrailersResponse>() {
             @Override
             public void onResponse(Call<MovieTrailersResponse> call, Response<MovieTrailersResponse> response) {

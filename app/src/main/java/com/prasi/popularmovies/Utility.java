@@ -24,7 +24,6 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Utility {
-    public static final String THE_MOVIE_DB_API_KEY = "XXXXX";
 
     public static String getPreferredSortOrder(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
